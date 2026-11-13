@@ -1,6 +1,8 @@
 // ---------- Load saved data from localStorage ----------
 let expenses = JSON.parse(localStorage.getItem("expenses")) || [];
 let budget = Number(localStorage.getItem("budget")) || 0;
+let hourlyIncome = Number(localStorage.getItem("hourlyIncome")) || 0;
+let darkMode = localStorage.getItem("darkMode") == "on";
 let myChart = null;
 
 // ---------- Set today's date in the date box ----------
@@ -24,6 +26,66 @@ function setTodayDate() {
 function saveData() {
   localStorage.setItem("expenses", JSON.stringify(expenses));
   localStorage.setItem("budget", budget);
+  localStorage.setItem("hourlyIncome", hourlyIncome);
+}
+
+// ---------- Save hourly income ----------
+function setHourlyIncome() {
+  let value = Number(document.getElementById("hourlyInput").value);
+
+  if (value <= 0) {
+    alert("Please enter a valid hourly income");
+    return;
+  }
+
+  hourlyIncome = value;
+  saveData();
+  document.getElementById("hourlyInput").value = "";
+  updateAll();
+}
+
+// ---------- Show hourly income message ----------
+function showHourlyIncome() {
+  let text = document.getElementById("hourlyShow");
+  if (hourlyIncome == 0) {
+    text.innerText = "Not set yet.";
+  } else {
+    text.innerText = "Your hourly income: ₹" + hourlyIncome;
+  }
+}
+
+// ---------- Find how many hours of work an expense costs ----------
+function getWorkHours(amount) {
+  if (hourlyIncome == 0) {
+    return "-";
+  }
+  let hours = amount / hourlyIncome;
+  return hours.toFixed(1) + " hrs";
+}
+
+// ---------- Dark mode on / off ----------
+function toggleDarkMode() {
+  darkMode = !darkMode;
+
+  if (darkMode) {
+    localStorage.setItem("darkMode", "on");
+  } else {
+    localStorage.setItem("darkMode", "off");
+  }
+
+  applyDarkMode();
+}
+
+function applyDarkMode() {
+  let button = document.getElementById("darkBtn");
+
+  if (darkMode) {
+    document.body.classList.add("dark");
+    button.innerText = "☀️ Light Mode";
+  } else {
+    document.body.classList.remove("dark");
+    button.innerText = "🌙 Dark Mode";
+  }
 }
 
 // ---------- Get current month like "2026-11" ----------
@@ -137,6 +199,7 @@ function showExpenses() {
         "<td>" + e.note + "</td>" +
         "<td>" + getMoodEmoji(e.mood) + "</td>" +
         "<td>₹" + e.amount + "</td>" +
+        "<td>" + getWorkHours(e.amount) + "</td>" +
         "<td><button class='delete-btn' onclick='deleteExpense(" + e.id + ")'>Delete</button></td>" +
         "</tr>";
 
@@ -253,6 +316,7 @@ function clearAll() {
   if (sure) {
     expenses = [];
     budget = 0;
+    hourlyIncome = 0;
     saveData();
     updateAll();
   }
@@ -262,9 +326,11 @@ function clearAll() {
 function updateAll() {
   showExpenses();
   updateSummary();
+  showHourlyIncome();
   drawChart();
 }
 
 // ---------- Run when page loads ----------
 setTodayDate();
+applyDarkMode();
 updateAll();
