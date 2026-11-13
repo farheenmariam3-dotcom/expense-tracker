@@ -2,7 +2,7 @@
 
 A simple expense tracker web app that helps you track your money **and your mood** while spending.
 
-🔗 **Live link:** sparkling-tulumba-73a1a6.netlify.app
+🔗 **Live link:** https://sparkling-tulumba-73a1a6.netlify.app
 
 ## Features
 
